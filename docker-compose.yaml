@@ -1,0 +1,71 @@
+services:
+  wordpress:
+    build:
+      context: .
+    container_name: wordpress
+    restart: always
+    tty: true
+    ports:
+      - "80:80" # HTTP
+    environment:
+      SERVER_NAME: ${SERVER_NAME:-:80}
+      WORDPRESS_DB_HOST: ${DB_HOST:-db}
+      WORDPRESS_DB_USER: ${DB_USER:-exampleuser}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-examplepass}
+      WORDPRESS_DB_NAME: ${DB_NAME:-exampledb}
+      WORDPRESS_DEBUG: ${WP_DEBUG:-true}
+      WORDPRESS_TABLE_PREFIX: ${DB_TABLE_PREFIX:-wp_}
+      CACHE_LOC: ${CACHE_LOC:-/var/www/html/wp-content/cache}
+      TTL: ${TTL:-80000}
+      PURGE_PATH: ${PURGE_PATH:-/__cache/purge}
+      PURGE_KEY: ${PURGE_KEY:-}
+      BYPASS_HOME: ${BYPASS_HOME:-false}
+      BYPASS_PATH_PREFIXES: ${BYPASS_PATH_PREFIXES:-/wp-admin,/wp-content,/wp-includes,/wp-json,/feed}
+      CACHE_RESPONSE_CODES: ${CACHE_RESPONSE_CODES:-000}
+      CADDY_GLOBAL_OPTIONS: |
+        email zakarianur6@gmail.com
+        auto_https disable_redirects
+        debug
+    volumes:
+      - ./wp-content:/var/www/html/wp-content
+    depends_on:
+      - db
+    networks:
+      - frankenwp
+
+  db:
+    image: jbergstroem/mariadb-alpine
+    container_name: mariadb
+    restart: always
+    tty: true
+    ports:
+      - ${LOCAL_DB_PORT:-3306}:3306
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-exampledb}
+      MYSQL_USER: ${DB_USER:-exampleuser}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-examplepass}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-examplepass}
+    volumes:
+      - db_wp:/var/lib/mysql
+    networks:
+      - frankenwp
+
+  redis:
+    image: redis:7.4.1-alpine
+    container_name: redis
+    restart: always
+    tty: true
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_wp:/data
+    networks:
+      - frankenwp
+
+networks:
+  frankenwp:
+    driver: bridge
+
+volumes:
+  db_wp:
+  redis_wp:
