@@ -16,6 +16,8 @@ services:
       WORDPRESS_DEBUG: ${WP_DEBUG:-true}
       WORDPRESS_TABLE_PREFIX: ${DB_TABLE_PREFIX:-wp_}
       CACHE_LOC: ${CACHE_LOC:-/var/www/html/wp-content/cache}
+      WP_REDIS_HOST: ${DB_NAME:-redis}
+      WP_REDIS_PORT:  ${DB_NAME:-6379}
       TTL: ${TTL:-80000}
       PURGE_PATH: ${PURGE_PATH:-/__cache/purge}
       PURGE_KEY: ${PURGE_KEY:-}
